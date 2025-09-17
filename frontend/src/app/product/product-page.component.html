@@ -1,44 +1,80 @@
-<div *ngIf="product; else loading">
-  <h1>{{ product.name }}</h1>
-  <p>{{ product.description }}</p>
+<div *ngIf="product; else loading" class="max-w-3xl mx-auto p-6">
+  <div class="bg-white rounded-lg shadow-md overflow-hidden">
+    <div class="p-6">
+      <h1 class="text-2xl font-bold">{{ product.name }}</h1>
+      <p class="mt-2 text-slate-600">{{ product.description }}</p>
 
-  <div class="selectors">
-    <label>
-      Size
-      <select [(ngModel)]="selected.size" (change)="tryFindCombination()">
-        <option value="">Choose</option>
-        <option *ngFor="let s of product.sizes" [value]="s">{{ s }}</option>
-      </select>
-    </label>
+      <div class="mt-6 space-y-4">
+        <div>
+          <div class="text-sm font-medium text-slate-700 mb-2">Size</div>
+          <div class="flex flex-wrap gap-2">
+            <button *ngFor="let s of product.sizes"
+                    (click)="selectVariant('size', s)"
+                    [attr.aria-pressed]="selected.size===s"
+                    [disabled]="!isOptionAvailable('size', s)"
+                    [ngClass]="{
+                      'px-3 py-1 rounded-md border focus:outline-none transition': true,
+                      'bg-sky-600 text-white border-sky-600 ring-2 ring-offset-1 ring-sky-400': selected.size===s,
+                      'bg-white text-slate-700 border-slate-200': selected.size!==s && isOptionAvailable('size', s),
+                      'bg-slate-100 text-slate-400 border-slate-100 cursor-not-allowed': !isOptionAvailable('size', s)
+                    }">
+              {{ s }}
+            </button>
+          </div>
+        </div>
 
-    <label>
-      Color
-      <select [(ngModel)]="selected.color" (change)="tryFindCombination()">
-        <option value="">Choose</option>
-        <option *ngFor="let c of product.colors" [value]="c">{{ c }}</option>
-      </select>
-    </label>
+        <div>
+          <div class="text-sm font-medium text-slate-700 mb-2">Color</div>
+          <div class="flex flex-wrap gap-2">
+            <button *ngFor="let c of product.colors"
+                    (click)="selectVariant('color', c)"
+                    [attr.aria-pressed]="selected.color===c"
+                    [disabled]="!isOptionAvailable('color', c)"
+                    [ngClass]="{
+                      'px-3 py-1 rounded-md border focus:outline-none transition': true,
+                      'bg-sky-600 text-white border-sky-600 ring-2 ring-offset-1 ring-sky-400': selected.color===c,
+                      'bg-white text-slate-700 border-slate-200': selected.color!==c && isOptionAvailable('color', c),
+                      'bg-slate-100 text-slate-400 border-slate-100 cursor-not-allowed': !isOptionAvailable('color', c)
+                    }">
+              {{ c }}
+            </button>
+          </div>
+        </div>
 
-    <label>
-      Fabric
-      <select [(ngModel)]="selected.fabric" (change)="tryFindCombination()">
-        <option value="">Choose</option>
-        <option *ngFor="let f of product.fabrics" [value]="f">{{ f }}</option>
-      </select>
-    </label>
-  </div>
+        <div>
+          <div class="text-sm font-medium text-slate-700 mb-2">Fabric</div>
+          <div class="flex flex-wrap gap-2">
+            <button *ngFor="let f of product.fabrics"
+                    (click)="selectVariant('fabric', f)"
+                    [attr.aria-pressed]="selected.fabric===f"
+                    [disabled]="!isOptionAvailable('fabric', f)"
+                    [ngClass]="{
+                      'px-3 py-1 rounded-md border focus:outline-none transition': true,
+                      'bg-sky-600 text-white border-sky-600 ring-2 ring-offset-1 ring-sky-400': selected.fabric===f,
+                      'bg-white text-slate-700 border-slate-200': selected.fabric!==f && isOptionAvailable('fabric', f),
+                      'bg-slate-100 text-slate-400 border-slate-100 cursor-not-allowed': !isOptionAvailable('fabric', f)
+                    }">
+              {{ f }}
+            </button>
+          </div>
+        </div>
+      </div>
 
-  <div class="result" *ngIf="finalCombination">
-    <div *ngIf="finalCombination.error">{{ finalCombination.error }}</div>
-    <div *ngIf="!finalCombination.error">
-      <h3>Selected Variant</h3>
-      <div>SKU: {{ finalCombination.sku }}</div>
-      <div>Price: {{ finalCombination.price }}</div>
-      <div>Stock: {{ finalCombination.stock }}</div>
+      <div class="mt-6">
+        <div *ngIf="finalCombination">
+          <div *ngIf="finalCombination.error" class="text-red-600">{{ finalCombination.error }}</div>
+          <div *ngIf="!finalCombination.error" class="space-y-2">
+            <h3 class="text-lg font-semibold">Selected Variant</h3>
+            <div class="text-sm">SKU: <span class="font-medium">{{ finalCombination.sku }}</span></div>
+            <div class="text-sm">Price: <span class="font-medium">{{ finalCombination.price }}</span></div>
+            <div class="text-sm">Stock: <span class="font-medium">{{ finalCombination.stock }}</span></div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
 <ng-template #loading>
-  <div>Loading product...</div>
+  <div class="p-6 text-center text-slate-600">Loading product...</div>
 </ng-template>

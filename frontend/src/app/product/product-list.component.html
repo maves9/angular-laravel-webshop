@@ -1,8 +1,18 @@
-<div>
-  <h2>Products</h2>
-  <ul>
-    <li *ngFor="let p of products">
-      <a [routerLink]="['/products', p.id]">{{ p.name }} - {{ p.price | currency }}</a>
-    </li>
-  </ul>
+<div class="max-w-4xl mx-auto p-6">
+  <h2 class="text-2xl font-semibold mb-4">Products</h2>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <article *ngFor="let p of products" class="bg-white rounded-lg shadow-sm overflow-hidden">
+      <div class="p-4">
+        <h3 class="text-lg font-medium">
+          <a class="text-sky-600 hover:underline" [routerLink]="['/products', p.id]">{{ p.name }}</a>
+        </h3>
+        <div class="mt-2 text-sm text-slate-600">{{ p.description }}</div>
+      </div>
+      <footer class="p-4 border-t bg-slate-50 flex items-center justify-between">
+        <div class="text-lg font-semibold">{{ p.price | currency }}</div>
+        <a class="text-sm text-sky-700 hover:underline" [routerLink]="['/products', p.id]">View</a>
+      </footer>
+    </article>
+  </div>
 </div>

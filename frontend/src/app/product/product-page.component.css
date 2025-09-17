@@ -1,4 +1,2 @@
-/* Minimal styling */
-.selectors{display:flex;gap:1rem;margin:1rem 0}
-label{display:flex;flex-direction:column}
-.result{margin-top:1rem;padding:0.5rem;border:1px solid #ddd}
+/* Tailwind utilities applied in template; no component styles required */
+

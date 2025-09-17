@@ -22,6 +22,35 @@ export class ProductPage {
     }
   }
 
+  selectVariant(type: 'size'|'color'|'fabric', value: string) {
+    (this.selected as any)[type] = value;
+    this.tryFindCombination();
+  }
+
+  isOptionAvailable(type: 'size'|'color'|'fabric', value: string): boolean {
+    if (!this.product || !this.product.combinations) return true;
+
+    // If no other selection is made, the option is available if any combination has this value
+    const combos = this.product.combinations as any[];
+
+    for (const c of combos) {
+      const opts = c.options || {};
+
+      // The candidate must match the option for the checked type
+      if (opts[type] !== value) continue;
+
+      // Other selected types must match if they are set
+      if (type !== 'size' && this.selected.size && opts.size !== this.selected.size) continue;
+      if (type !== 'color' && this.selected.color && opts.color !== this.selected.color) continue;
+      if (type !== 'fabric' && this.selected.fabric && opts.fabric !== this.selected.fabric) continue;
+
+      // If stock exists (or stock is zero but combination exists) consider available
+      return true;
+    }
+
+    return false;
+  }
+
   async loadProduct(id: string) {
   const res = await fetch(`http://localhost:8000/api/products/${id}`);
     if (res.ok) {
