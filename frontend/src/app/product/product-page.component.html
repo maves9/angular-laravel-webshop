@@ -1,0 +1,44 @@
+<div *ngIf="product; else loading">
+  <h1>{{ product.name }}</h1>
+  <p>{{ product.description }}</p>
+
+  <div class="selectors">
+    <label>
+      Size
+      <select [(ngModel)]="selected.size" (change)="tryFindCombination()">
+        <option value="">Choose</option>
+        <option *ngFor="let s of product.sizes" [value]="s">{{ s }}</option>
+      </select>
+    </label>
+
+    <label>
+      Color
+      <select [(ngModel)]="selected.color" (change)="tryFindCombination()">
+        <option value="">Choose</option>
+        <option *ngFor="let c of product.colors" [value]="c">{{ c }}</option>
+      </select>
+    </label>
+
+    <label>
+      Fabric
+      <select [(ngModel)]="selected.fabric" (change)="tryFindCombination()">
+        <option value="">Choose</option>
+        <option *ngFor="let f of product.fabrics" [value]="f">{{ f }}</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="result" *ngIf="finalCombination">
+    <div *ngIf="finalCombination.error">{{ finalCombination.error }}</div>
+    <div *ngIf="!finalCombination.error">
+      <h3>Selected Variant</h3>
+      <div>SKU: {{ finalCombination.sku }}</div>
+      <div>Price: {{ finalCombination.price }}</div>
+      <div>Stock: {{ finalCombination.stock }}</div>
+    </div>
+  </div>
+</div>
+
+<ng-template #loading>
+  <div>Loading product...</div>
+</ng-template>
