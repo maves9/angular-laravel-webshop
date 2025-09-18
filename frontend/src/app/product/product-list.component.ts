@@ -6,8 +6,7 @@ import { RouterModule } from '@angular/router';
   standalone: true,
   selector: 'app-product-list',
   imports: [CommonModule, RouterModule],
-  templateUrl: './product-list.component.html',
-  styleUrls: ['./product-list.component.css']
+  templateUrl: './product-list.component.html'
 })
 export class ProductList {
   products: any[] = [];
@@ -17,7 +16,7 @@ export class ProductList {
   }
 
   async loadProducts() {
-    const res = await fetch('http://localhost:8000/api/products');
+    const res = await fetch('http://localhost:8000/api/products', { credentials: 'include' });
     if (res.ok) {
       this.products = await res.json();
     }
