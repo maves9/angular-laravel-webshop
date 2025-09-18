@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import type { ProductWithExtras } from '../api-types-extensions';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
@@ -9,7 +10,7 @@ import { RouterModule } from '@angular/router';
   templateUrl: './product-list.component.html'
 })
 export class ProductList {
-  products: any[] = [];
+  products: ProductWithExtras[] = [];
 
   constructor() {
     this.loadProducts();

@@ -11,7 +11,12 @@ class ProductVariant extends Model
 
     protected $fillable = [
         'product_id',
-        'type',
+        'variant_type_id',
         'value',
     ];
+
+    public function variantType()
+    {
+        return $this->belongsTo(VariantType::class, 'variant_type_id');
+    }
 }

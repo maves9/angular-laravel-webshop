@@ -35,7 +35,7 @@
             <label class="text-sm">Quantity</label>
             <input type="number" min="1" [(ngModel)]="quantity" name="quantity" class="w-20 px-2 py-1 border rounded" />
             <!-- Disable add when there is no valid final combination or it contains an error -->
-            <app-button type="submit" [disabled]="!finalCombination || finalCombination.error">Add to cart</app-button>
+            <app-button type="submit" [disabled]="!finalCombination || !!finalCombination.error">Add to cart</app-button>
           </div>
         </form>
       </div>

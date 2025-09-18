@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { CartService } from '../cart/cart.service';
+import type { CartItem } from '../cart/cart-types';
 
 @Component({
   standalone: true,
@@ -45,7 +46,7 @@ import { CartService } from '../cart/cart.service';
   `,
 })
 export class HeaderComponent implements OnInit, OnDestroy {
-  cart: any[] = [];
+  cart: CartItem[] = [];
   totalCount = 0;
   totalPriceDisplay = '';
   dropdownOpen = false;
@@ -54,12 +55,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
   constructor(private cartService: CartService) {}
 
   ngOnInit(): void {
-    // subscribe to cart observable
-    this.sub = this.cartService.getCartObservable().subscribe((cart: any[]) => {
-      this.cart = cart || [];
-      this.totalCount = this.cart.reduce((acc, it) => acc + (it.quantity || it.qty || 0), 0);
-      const total = this.cart.reduce((acc, it) => acc + ((it.price || 0) * (it.quantity || it.qty || 0)), 0);
-      this.totalPriceDisplay = this.formatPrice(total);
+    this.sub = this.cartService.getCartObservable().subscribe(raw => {
+      const normalized = this.normalizeCart(raw);
+      this.cart = normalized;
+      this.updateTotals(normalized);
     });
     // fetch initial cart
     this.cartService.fetch().catch(() => {});
@@ -77,5 +76,31 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private formatPrice(n: number) {
     if (!n) return '€0.00';
     return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'EUR' }).format(n);
+  }
+
+  /**
+   * Normalize possible backend cart payload shapes into a CartItem array.
+   * Supports: [] | { cart: [] } | numeric-keyed object -> array
+   */
+  private normalizeCart(raw: CartItem[] | { cart: CartItem[] } | Record<string, CartItem> | null): CartItem[] {
+    if (!raw) return [];
+    if (Array.isArray(raw)) return raw;
+    if ('cart' in raw && Array.isArray((raw as any).cart)) return (raw as any).cart as CartItem[];
+
+    if (typeof raw === 'object') {
+      const maybeArray = Object.keys(raw)
+        .filter(k => !isNaN(Number(k)))
+        .sort((a, b) => Number(a) - Number(b))
+        .map(k => (raw as Record<string, CartItem>)[k]);
+      if (maybeArray.length) return maybeArray;
+    }
+
+    return [];
+  }
+
+  private updateTotals(items: CartItem[]) {
+    this.totalCount = items.reduce((acc, it) => acc + (Number(it?.quantity ?? it?.qty ?? 0)), 0);
+    const total = items.reduce((acc, it) => acc + ((Number(it?.price ?? 0)) * (Number(it?.quantity ?? it?.qty ?? 0))), 0);
+    this.totalPriceDisplay = this.formatPrice(total);
   }
 }

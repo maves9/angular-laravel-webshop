@@ -34,6 +34,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "gen:api-types": "openapi-typescript ../backend/storage/api-docs/api-docs.json --output src/app/api-types.ts",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
@@ -52,6 +53,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "openapi-typescript": "^7.9.1",
     "tailwindcss": "^4.1.13",
     "typescript": "~5.9.2"
   }

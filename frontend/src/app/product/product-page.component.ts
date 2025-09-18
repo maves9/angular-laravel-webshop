@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import type { Product } from '../api-types-exports';
+import type { ProductWithExtras, ProductVariantCombinationWithOptions, CombinationResult } from '../api-types-extensions';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -13,9 +15,9 @@ import { CartService } from '../cart/cart.service';
   templateUrl: './product-page.component.html',
 })
 export class ProductPage {
-  product: any = null;
+  product: ProductWithExtras | null = null;
   selected: Record<string, string> = {};
-  finalCombination: any = null;
+  finalCombination: CombinationResult | null = null;
   quantity = 1;
 
   constructor(private route: ActivatedRoute, private cartService: CartService) {
@@ -28,21 +30,22 @@ export class ProductPage {
   async addToCart() {
     if (!this.product) return;
 
-    const combination = this.finalCombination && !this.finalCombination.error ? this.finalCombination : null;
+  const combination = this.finalCombination && !('error' in this.finalCombination) ? (this.finalCombination as ProductVariantCombinationWithOptions) : null;
 
     const qty = this.quantity || 1;
 
-    const options = { ...(this.selected || {}) , ...(combination?.options || {}) };
+    const options = { ...(this.selected || {}), ...(combination?.options || {}) } as Record<string, unknown>;
 
-    if (combination && combination.id) {
-      (options as any).combination_id = combination.id;
+    if (combination && 'id' in combination) {
+      (options as Record<string, unknown>)['combination_id'] = combination.id;
     }
 
     try {
       await this.cartService.add(this.product.id, qty, options);
       alert('Added to cart');
-    } catch (e: any) {
-      alert(`Failed to add to cart: ${e.message}`);
+    } catch (e: unknown) {
+      const msg = e && typeof e === 'object' && 'message' in e ? (e as any).message : String(e);
+      alert(`Failed to add to cart: ${msg}`);
     }
   }
 
@@ -55,11 +58,11 @@ export class ProductPage {
     if (this.product?.variantTypes && Array.isArray(this.product.variantTypes)) {
       return this.product.variantTypes;
     }
-    const combos = this.product?.combinations as any[] | undefined;
+    const combos = (this.product?.combinations as ProductVariantCombinationWithOptions[] | undefined) || undefined;
     if (!combos || combos.length === 0) return [];
     const keys = new Set<string>();
     for (const c of combos) {
-      const opts = c.options || {};
+      const opts = (c.options as Record<string, string> | undefined) || {};
       for (const k of Object.keys(opts)) keys.add(k);
     }
     return Array.from(keys);
@@ -68,12 +71,12 @@ export class ProductPage {
   isOptionAvailable(variantName: string, value: string): boolean {
     if (!this.product || !this.product.combinations) return true;
 
-    const combos = this.product.combinations as any[];
+    const combos = this.product.combinations as ProductVariantCombinationWithOptions[];
 
     for (const c of combos) {
-      const opts = c.options || {};
+  const opts = (c.options as Record<string, string> | undefined) || {};
 
-      if (opts[variantName] !== value) continue;
+  if (opts[variantName] !== value) continue;
 
       let ok = true;
       for (const [otherName, otherValue] of Object.entries(this.selected)) {
@@ -95,14 +98,14 @@ export class ProductPage {
     if (!this.product) return [];
 
     const plural = `${variantName}s`;
-    const arr = this.product[plural];
+    const arr = this.product ? (this.product[plural] as string[] | undefined) : undefined;
     if (Array.isArray(arr)) return arr;
 
-    const combos = this.product.combinations as any[] | undefined;
+    const combos = (this.product?.combinations as ProductVariantCombinationWithOptions[] | undefined) || undefined;
     if (!combos || combos.length === 0) return [];
     const set = new Set<string>();
     for (const c of combos) {
-      const opts = c.options || {};
+      const opts = (c.options as Record<string, string> | undefined) || {};
       if (opts[variantName]) set.add(opts[variantName]);
     }
     return Array.from(set);
@@ -111,7 +114,7 @@ export class ProductPage {
   async loadProduct(id: string) {
     const res = await fetch(`http://localhost:8000/api/products/${id}`, { credentials: 'include' });
     if (res.ok) {
-      this.product = await res.json();
+      this.product = await res.json() as ProductWithExtras;
       this.selected = {};
       this.finalCombination = null;
     }
@@ -119,16 +122,16 @@ export class ProductPage {
 
   async tryFindCombination() {
     this.finalCombination = null;
-    const variantTypes = this.getVariantTypes();
+  const variantTypes = this.getVariantTypes();
 
     for (const vt of variantTypes) {
       if (!this.selected[vt]) return;
     }
 
-    const qs = new URLSearchParams(this.selected as any).toString();
-    const res = await fetch(`http://localhost:8000/api/products/${this.product.id}/combinations/find?${qs}`, { credentials: 'include' });
+    const qs = new URLSearchParams(this.selected as Record<string, string>).toString();
+    const res = await fetch(`http://localhost:8000/api/products/${this.product!.id}/combinations/find?${qs}`, { credentials: 'include' });
     if (res.ok) {
-      this.finalCombination = await res.json();
+      this.finalCombination = await res.json() as ProductVariantCombinationWithOptions;
     } else {
       this.finalCombination = { error: 'Combination not available' };
     }

@@ -20,9 +20,10 @@ class ProductController extends Controller
 
     private function formatProduct(Product $product): array
     {
-        $sizes = $product->variants->where('type', 'size')->pluck('value')->unique()->values()->all();
-        $colors = $product->variants->where('type', 'color')->pluck('value')->unique()->values()->all();
-        $fabrics = $product->variants->where('type', 'fabric')->pluck('value')->unique()->values()->all();
+        $variants = $product->variants->load('variantType');
+        $sizes = $variants->filter(fn($v) => $v->variantType && $v->variantType->name === 'size')->pluck('value')->unique()->values()->all();
+        $colors = $variants->filter(fn($v) => $v->variantType && $v->variantType->name === 'color')->pluck('value')->unique()->values()->all();
+        $fabrics = $variants->filter(fn($v) => $v->variantType && $v->variantType->name === 'fabric')->pluck('value')->unique()->values()->all();
 
         return [
             'id' => $product->id,
@@ -53,25 +54,24 @@ class ProductController extends Controller
         return response()->json($this->formatProduct($product));
     }
 
-    // List combinations for a product
     public function combinations(Product $product): JsonResponse
     {
         $product->load('combinations');
         return response()->json($product->combinations);
     }
 
-    // Find a single combination by options: ?size=&color=&fabric=
     public function findCombination(Request $request, Product $product): JsonResponse
     {
-        $size = $request->query('size');
-        $color = $request->query('color');
-        $fabric = $request->query('fabric');
-
+        $params = array_filter($request->query(), function($v) { return $v !== null && $v !== ''; });
         $query = $product->combinations()->newQuery();
 
-        $query->whereJsonContains('options->size', $size);
-        $query->whereJsonContains('options->color', $color);
-        $query->whereJsonContains('options->fabric', $fabric);
+        if (empty($params)) {
+            return response()->json(['message' => 'No variant query parameters provided'], 400);
+        }
+
+        foreach ($params as $name => $value) {
+            $query->whereJsonContains("options->{$name}", $value);
+        }
 
         $combination = $query->first();
 
@@ -98,7 +98,6 @@ class ProductController extends Controller
             foreach ($data['variants'] as $v) {
                 $product->variants()->create($v);
             }
-            // Optionally create combinations later; client can POST combinations separately
         }
 
         return response()->json($product->load('variants'), 201);
@@ -117,12 +116,10 @@ class ProductController extends Controller
         $product->update($data);
 
         if (isset($data['variants'])) {
-            // Simple approach: delete existing and recreate
             $product->variants()->delete();
             foreach ($data['variants'] as $v) {
                 $product->variants()->create($v);
             }
-            // Note: combinations are unchanged here - client can update combinations explicitly
         }
 
         return response()->json($product->load('variants'));
