@@ -1,24 +1,18 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component } from '@angular/core'
+import { CommonModule } from '@angular/common'
 
 @Component({
   standalone: true,
   selector: 'app-footer',
   imports: [CommonModule],
   template: `
-    <footer class="site-footer">
-      <div class="container">
-        <small>© {{ year }} Webshop</small>
+    <footer class="bg-gray-100 text-gray-800 py-4 mt-8" role="contentinfo" aria-label="Site footer">
+      <div class="max-w-4xl mx-auto px-4">
+        <small class="text-sm">© {{ year }} Webshop</small>
       </div>
     </footer>
-  `,
-  styles: [
-    `:host { display:block; }
-     .site-footer { background:#f5f5f5; color:#333; padding:1rem 0; margin-top:2rem; }
-     .site-footer .container { max-width:1100px; margin:0 auto; padding:0 1rem; }
-    `
-  ]
+  `
 })
 export class FooterComponent {
-  year = new Date().getFullYear();
+  year = new Date().getFullYear()
 }
