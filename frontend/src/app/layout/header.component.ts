@@ -129,8 +129,4 @@ export class HeaderComponent implements OnInit {
 
     return []
   }
-
-  private updateTotals(): void {
-    // kept for compatibility but no longer used - totals are computed from signals
-  }
 }
