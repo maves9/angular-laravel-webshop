@@ -17,6 +17,9 @@
             "polyfills": [
               "zone.js"
             ],
+            "styles": [
+              "src/styles.css"
+            ],
             "tsConfig": "tsconfig.app.json",
             "assets": [
               {

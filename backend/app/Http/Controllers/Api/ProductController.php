@@ -21,9 +21,30 @@ class ProductController extends Controller
     private function formatProduct(Product $product): array
     {
         $variants = $product->variants->load('variantType');
-        $sizes = $variants->filter(fn($v) => $v->variantType && $v->variantType->name === 'size')->pluck('value')->unique()->values()->all();
-        $colors = $variants->filter(fn($v) => $v->variantType && $v->variantType->name === 'color')->pluck('value')->unique()->values()->all();
-        $fabrics = $variants->filter(fn($v) => $v->variantType && $v->variantType->name === 'fabric')->pluck('value')->unique()->values()->all();
+        $variantOptions = [];
+        foreach ($variants as $v) {
+            if (!$v->variantType || !$v->variantType->name) {
+                continue;
+            }
+
+            $typeName = strtolower($v->variantType->name);
+            // store objects with value and price (price may be 0)
+            $variantOptions[$typeName][] = [
+                'value' => $v->value,
+                'price' => isset($v->price) ? floatval($v->price) : 0.0,
+                // include descriptions (array of locale => text) so frontend can choose locale
+                'descriptions' => isset($v->descriptions) ? $v->descriptions : null,
+            ];
+        }
+
+        // make unique by value and reindex
+        foreach ($variantOptions as $k => $items) {
+            $unique = [];
+            foreach ($items as $it) {
+                $unique[$it['value']] = $it;
+            }
+            $variantOptions[$k] = array_values($unique);
+        }
 
         return [
             'id' => $product->id,
@@ -33,16 +54,32 @@ class ProductController extends Controller
             'stock' => $product->stock,
             'created_at' => $product->created_at,
             'updated_at' => $product->updated_at,
-            'sizes' => $sizes,
-            'colors' => $colors,
-            'fabrics' => $fabrics,
-            'combinations' => $product->combinations->map(function ($c) {
+            'variant_options' => $variantOptions,
+            'combinations' => $product->combinations->map(function ($c) use ($product) {
+                // Build a human readable description for the combination by
+                // aggregating variant descriptions for the chosen options when available.
+                $comboDesc = null;
+                $opts = $c->options ?? [];
+                $parts = [];
+                foreach ($opts as $type => $val) {
+                    $pv = $product->variants->first(function($x) use ($type, $val) {
+                        return optional($x->variantType)->name && strtolower(optional($x->variantType)->name) === strtolower($type) && (string)$x->value === (string)$val;
+                    });
+                    if ($pv && is_array($pv->descriptions)) {
+                        // prefer English if available
+                        if (!empty($pv->descriptions['en'])) $parts[] = $pv->descriptions['en'];
+                        else $parts[] = array_values($pv->descriptions)[0] ?? null;
+                    }
+                }
+                if (!empty($parts)) $comboDesc = implode(' — ', array_filter($parts));
+
                 return [
                     'id' => $c->id,
                     'sku' => $c->sku,
                     'price' => $c->price,
                     'stock' => $c->stock,
                     'options' => $c->options,
+                    'description' => $comboDesc,
                 ];
             })->values(),
         ];
@@ -79,7 +116,24 @@ class ProductController extends Controller
             return response()->json(null, 404);
         }
 
-        return response()->json($combination);
+        // Build a description for this combination from the product's variants
+        $comboDesc = null;
+        $opts = $combination->options ?? [];
+        $parts = [];
+        foreach ($opts as $type => $val) {
+            $pv = $product->variants->first(function($x) use ($type, $val) {
+                return optional($x->variantType)->name && strtolower(optional($x->variantType)->name) === strtolower($type) && (string)$x->value === (string)$val;
+            });
+            if ($pv && is_array($pv->descriptions)) {
+                if (!empty($pv->descriptions['en'])) $parts[] = $pv->descriptions['en'];
+                else $parts[] = array_values($pv->descriptions)[0] ?? null;
+            }
+        }
+        if (!empty($parts)) $comboDesc = implode(' — ', array_filter($parts));
+
+        $out = $combination->toArray();
+        $out['description'] = $comboDesc;
+        return response()->json($out);
     }
 
     public function store(Request $request): JsonResponse

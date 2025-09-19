@@ -14,6 +14,11 @@ class ProductVariantFactory extends Factory
         return [
             'type' => $this->faker->randomElement(['size', 'color', 'fabric']),
             'value' => $this->faker->word(),
+            // Provide translations for English and Danish; factories should create unique-ish texts
+            'descriptions' => [
+                'en' => $this->faker->unique()->sentence(6),
+                'da' => $this->faker->unique()->sentence(6) . ' (DA)',
+            ],
         ];
     }
 }

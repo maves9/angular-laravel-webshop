@@ -60,8 +60,8 @@ class DatabaseSeeder extends Seeder
                     ['type' => 'size', 'value' => 'L'],
                     ['type' => 'color', 'value' => 'red'],
                     ['type' => 'color', 'value' => 'blue'],
-                    ['type' => 'fabric', 'value' => 'cotton'],
-                    ['type' => 'fabric', 'value' => 'polyester'],
+                    ['type' => 'fabric', 'value' => 'cotton', 'price' => 2.50],
+                    ['type' => 'fabric', 'value' => 'polyester', 'price' => -1.00],
                 ],
                 'combinationSkipRule' => function($opts) {
                     // Example: skip red+polyester combos
@@ -97,7 +97,7 @@ class DatabaseSeeder extends Seeder
                     ['type' => 'color', 'value' => 'blue'],
                     ['type' => 'color', 'value' => 'black'],
                     ['type' => 'fabric', 'value' => 'denim'],
-                    ['type' => 'fabric', 'value' => 'stretch-denim'],
+                    ['type' => 'fabric', 'value' => 'stretch-denim', 'price' => 15.00],
                     ['type' => 'trim', 'value' => 'standard'],
                 ],
                 'combinationSkipRule' => function($opts) {
@@ -115,6 +115,107 @@ class DatabaseSeeder extends Seeder
                     ['type' => 'size', 'value' => 'S'],
                     ['type' => 'size', 'value' => 'M'],
                     ['type' => 'size', 'value' => 'L'],
+                ],
+                'combinationSkipRule' => null,
+            ],
+            // New products with additional variant types
+            [
+                'name' => 'Athletic Shorts',
+                'description' => 'Lightweight shorts for workouts.',
+                'price' => 29.99,
+                'stock' => 40,
+                'variants' => [
+                    ['type' => 'size', 'value' => 'S'],
+                    ['type' => 'size', 'value' => 'M'],
+                    ['type' => 'size', 'value' => 'L'],
+                    ['type' => 'color', 'value' => 'black'],
+                    ['type' => 'color', 'value' => 'navy'],
+                    ['type' => 'length', 'value' => 'short'],
+                    ['type' => 'fit', 'value' => 'regular'],
+                    ['type' => 'fit', 'value' => 'slim'],
+                ],
+                'combinationSkipRule' => null,
+            ],
+
+            [
+                'name' => 'Raincoat',
+                'description' => 'Waterproof raincoat with taped seams.',
+                'price' => 129.99,
+                'stock' => 15,
+                'variants' => [
+                    ['type' => 'size', 'value' => 'M'],
+                    ['type' => 'size', 'value' => 'L'],
+                    ['type' => 'color', 'value' => 'yellow'],
+                    ['type' => 'color', 'value' => 'black'],
+                    ['type' => 'material', 'value' => 'waterproof', 'price' => 20.00],
+                    ['type' => 'material', 'value' => 'breathable'],
+                    ['type' => 'closure', 'value' => 'zipper'],
+                    ['type' => 'closure', 'value' => 'buttons'],
+                ],
+                'combinationSkipRule' => function($opts) {
+                    // Avoid yellow + buttons for stylistic reasons
+                    return (isset($opts['color']) && isset($opts['closure']) && $opts['color'] === 'yellow' && $opts['closure'] === 'buttons');
+                },
+                // Explicit per-combination overrides. Each entry specifies an
+                // 'options' map to match and may include 'price', 'price_delta',
+                // 'stock', and/or 'sku' to override the generated combination.
+                'explicit_combinations' => [
+                    [
+                        'options' => ['material' => 'waterproof', 'closure' => 'zipper'],
+                        'price' => 189.99,
+                        // optional: set a custom stock or sku for this combination
+                        'stock' => 5,
+                    ],
+                ],
+            ],
+
+            [
+                'name' => 'Silk Scarf',
+                'description' => 'Premium silk scarf with multiple patterns.',
+                'price' => 39.99,
+                'stock' => 60,
+                'variants' => [
+                    ['type' => 'pattern', 'value' => 'striped'],
+                    ['type' => 'pattern', 'value' => 'polka'],
+                    ['type' => 'material', 'value' => 'silk', 'price' => 25.00],
+                    ['type' => 'length', 'value' => 'long'],
+                    ['type' => 'print', 'value' => 'logo'],
+                    ['type' => 'print', 'value' => 'plain'],
+                ],
+                'combinationSkipRule' => null,
+            ],
+
+            [
+                'name' => 'Cargo Pants',
+                'description' => 'Durable cargo pants with multiple pockets.',
+                'price' => 69.99,
+                'stock' => 25,
+                'variants' => [
+                    ['type' => 'size', 'value' => 'M'],
+                    ['type' => 'size', 'value' => 'L'],
+                    ['type' => 'size', 'value' => 'XL'],
+                    ['type' => 'color', 'value' => 'khaki'],
+                    ['type' => 'color', 'value' => 'olive'],
+                    ['type' => 'fit', 'value' => 'relaxed'],
+                    ['type' => 'length', 'value' => 'regular'],
+                    ['type' => 'length', 'value' => 'long'],
+                ],
+                'combinationSkipRule' => null,
+            ],
+
+            [
+                'name' => 'Running Cap',
+                'description' => 'Breathable running cap with adjustable closure.',
+                'price' => 19.99,
+                'stock' => 100,
+                'variants' => [
+                    ['type' => 'color', 'value' => 'red'],
+                    ['type' => 'color', 'value' => 'black'],
+                    ['type' => 'color', 'value' => 'blue'],
+                    ['type' => 'closure', 'value' => 'snapback'],
+                    ['type' => 'closure', 'value' => 'strapback'],
+                    ['type' => 'print', 'value' => 'logo'],
+                    ['type' => 'print', 'value' => 'plain'],
                 ],
                 'combinationSkipRule' => null,
             ],
@@ -136,7 +237,24 @@ class DatabaseSeeder extends Seeder
                 } else {
                     $vt_id = $vt->id;
                 }
-                $product->variants()->create(['variant_type_id' => $vt_id, 'value' => $v['value']]);
+
+                // Allow optional per-variant price (delta). Expecting 'price' in variant definition if needed.
+                // Build a unique description per variant using product, type and value
+                $enDesc = sprintf('%s - %s: %s', $product->name, $v['type'], $v['value']);
+                $daDesc = sprintf('%s - %s: %s', $product->name, $v['type'], $v['value']);
+
+                $variantData = [
+                    'variant_type_id' => $vt_id,
+                    'value' => $v['value'],
+                    'descriptions' => [
+                        'en' => $enDesc,
+                        'da' => $daDesc,
+                    ],
+                ];
+                $variantData['price'] = array_key_exists('price', $v) ? $v['price'] : 0;
+                $variantData['stock'] = array_key_exists('stock', $v) ? intval($v['stock']) : 0;
+
+                $product->variants()->create($variantData);
             }
             // Build combinations generically based on whatever variant types exist for this product
             $variants = $product->variants()->with('variantType')->get();
@@ -160,7 +278,6 @@ class DatabaseSeeder extends Seeder
             // Prepare lists in order of typeNames for cartesian product
             $lists = array_values($valuesByType);
 
-            // Simple iterative Cartesian product generator (returns array of arrays)
             $cartesianProduct = function(array $arrays) {
                 $result = [[]];
                 foreach ($arrays as $values) {
@@ -177,9 +294,13 @@ class DatabaseSeeder extends Seeder
 
             $allCombos = $cartesianProduct($lists);
 
-            // Determine stock per combination (distribute product stock across combos)
+            // Determine stock per combination. If variants have per-variant stock
+            // values, compute combination stock as the minimum of the selected
+            // variant stocks (non-zero values only). Otherwise distribute the
+            // product stock across combos as before.
             $totalCombos = max(1, count($allCombos));
-            $perComboStock = max(0, intval($product->stock / $totalCombos));
+            $defaultDistributedStock = max(0, intval($product->stock / $totalCombos));
+            $perComboStock = $defaultDistributedStock;
 
             // Optional skip rule provided per product
             $combinationSkipRule = $p['combinationSkipRule'] ?? null;
@@ -207,9 +328,69 @@ class DatabaseSeeder extends Seeder
                 }
 
                 $sku = $buildSku($product, $opts);
+
+                // Compute combination price: start with base product price and add any
+                // per-variant price deltas stored on the ProductVariant entries.
+                $comboPrice = $product->price;
+                foreach ($opts as $type => $val) {
+                    $pv = $product->variants()->whereHas('variantType', function($q) use ($type) {
+                        $q->where('name', $type);
+                    })->where('value', $val)->first();
+                    if ($pv && isset($pv->price) && $pv->price != 0) {
+                        $comboPrice += floatval($pv->price);
+                    }
+                }
+
+                // Apply any explicit per-combination overrides defined on the
+                // product seed entry. These can override price, stock and sku.
+                $explicit = $p['explicit_combinations'] ?? [];
+                $appliedExplicit = false;
+                foreach ($explicit as $ex) {
+                    $match = $ex['options'] ?? [];
+                    $isMatch = true;
+                    foreach ($match as $k => $v) {
+                        if (!isset($opts[$k]) || strtolower((string)$opts[$k]) !== strtolower((string)$v)) {
+                            $isMatch = false;
+                            break;
+                        }
+                    }
+                    if ($isMatch) {
+                        if (array_key_exists('price', $ex)) {
+                            $comboPrice = floatval($ex['price']);
+                        } elseif (array_key_exists('price_delta', $ex)) {
+                            $comboPrice += floatval($ex['price_delta']);
+                        }
+                        if (array_key_exists('stock', $ex)) {
+                            $perComboStock = intval($ex['stock']);
+                        }
+                        if (array_key_exists('sku', $ex)) {
+                            $sku = $ex['sku'];
+                        }
+                        $appliedExplicit = true;
+                        break;
+                    }
+                }
+
+                // If no explicit override applied, compute per-combination stock
+                // from per-variant stocks when available.
+                if (! $appliedExplicit) {
+                    $variantStocks = [];
+                    foreach ($opts as $type => $val) {
+                        $pv = $product->variants()->whereHas('variantType', function($q) use ($type) {
+                            $q->where('name', $type);
+                        })->where('value', $val)->first();
+                        if ($pv && isset($pv->stock) && $pv->stock > 0) {
+                            $variantStocks[] = intval($pv->stock);
+                        }
+                    }
+                    if (!empty($variantStocks)) {
+                        $perComboStock = min($variantStocks);
+                    }
+                }
+
                 $product->combinations()->create([
                     'sku' => $sku,
-                    'price' => $product->price,
+                    'price' => $comboPrice,
                     'stock' => $perComboStock,
                     'options' => $opts,
                 ]);
