@@ -1,7 +1,7 @@
-import { Component } from '@angular/core'
-import type { ProductWithExtras } from '../api-types-extensions'
-import { CommonModule } from '@angular/common'
-import { RouterModule } from '@angular/router'
+import { Component } from '@angular/core';
+import type { ProductWithExtras } from '../api-types-extensions';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 
 @Component({
   standalone: true,
@@ -10,16 +10,16 @@ import { RouterModule } from '@angular/router'
   templateUrl: './product-list.component.html',
 })
 export class ProductList {
-  products: ProductWithExtras[] = []
+  products: ProductWithExtras[] = [];
 
   constructor() {
-    this.loadProducts()
+    this.loadProducts();
   }
 
   async loadProducts() {
-    const res = await fetch('http://localhost:8000/api/products', { credentials: 'include' })
+    const res = await fetch('http://localhost:8000/api/products', { credentials: 'include' });
     if (res.ok) {
-      this.products = await res.json()
+      this.products = await res.json();
     }
   }
 }

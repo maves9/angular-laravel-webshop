@@ -1,6 +1,6 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core'
-import { CommonModule } from '@angular/common'
-import { ButtonComponent } from '../ui/button.component'
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ButtonComponent } from '../ui/button.component';
 
 @Component({
   standalone: true,
@@ -19,16 +19,16 @@ import { ButtonComponent } from '../ui/button.component'
   `,
 })
 export class VariantButtonComponent {
-  @Input() variantName = ''
-  @Input() value: string = ''
-  @Input() selectedValue: string | undefined
-  @Input() disabled = false
+  @Input() variantName = '';
+  @Input() value: string = '';
+  @Input() selectedValue: string | undefined;
+  @Input() disabled = false;
   // renamed output to avoid colliding with native DOM `select` event
-  @Output() selected = new EventEmitter<{ variant: string; value: string }>()
+  @Output() selected = new EventEmitter<{ variant: string; value: string }>();
 
   onClick() {
     if (!this.disabled) {
-  this.selected.emit({ variant: this.variantName, value: this.value })
+      this.selected.emit({ variant: this.variantName, value: this.value });
     }
   }
 }
