@@ -1,0 +1,4 @@
+/* Convenience shim for test config: import existing global styles.
+   If you intend to use Tailwind, replace contents with Tailwind directives.
+*/
+@import './styles.css';

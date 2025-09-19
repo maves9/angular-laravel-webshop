@@ -14,7 +14,7 @@
               [value]="opt"
               [selectedValue]="selected[vt]"
               [disabled]="!isOptionAvailable(vt, opt)"
-              (select)="selectVariant($event.variant, $event.value)"
+              (selected)="selectVariant($event.variant, $event.value)"
             >
             </app-variant-button>
           </div>

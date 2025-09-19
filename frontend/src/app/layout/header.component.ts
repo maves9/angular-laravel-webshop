@@ -1,16 +1,8 @@
-import {
-  Component,
-  OnInit,
-  computed,
-  Signal,
-  signal,
-  DestroyRef,
-  WritableSignal,
-} from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { CartService } from '../cart/cart.service';
-import type { CartItem } from '../cart/cart-types';
+import { Component, OnInit, computed, signal, inject, WritableSignal } from '@angular/core'
+import { CommonModule } from '@angular/common'
+import { RouterModule } from '@angular/router'
+import { CartService } from '../cart/cart.service'
+import type { CartItem } from '../cart/cart-types'
 
 @Component({
   standalone: true,
@@ -71,74 +63,74 @@ import type { CartItem } from '../cart/cart-types';
 })
 export class HeaderComponent implements OnInit {
   // raw cart signal (may be array, object, or null)
-  private _cartRaw: WritableSignal<
-    CartItem[] | { cart: CartItem[] } | Record<string, CartItem> | null
-  > = signal(null);
+  private _cartRaw: WritableSignal<CartItem[] | { cart: CartItem[] } | Record<string, CartItem> | null> = signal(null)
 
   // normalized cart as a computed signal
-  readonly cart = computed(() => this.normalizeCart(this._cartRaw()));
+  readonly cart = computed(() => this.normalizeCart(this._cartRaw()))
 
   // derived totals as computed signals
   readonly totalCount = computed(() =>
     this.cart().reduce((acc, it) => acc + Number(it?.quantity ?? it?.qty ?? 0), 0),
-  );
+  )
   readonly totalPriceDisplay = computed(() => {
     const total = this.cart().reduce(
       (acc, it) => acc + Number(it?.price ?? 0) * Number(it?.quantity ?? it?.qty ?? 0),
       0,
-    );
-    return this.formatPrice(total);
-  });
+    )
+    return this.formatPrice(total)
+  })
 
-  dropdownOpen = false;
+  dropdownOpen = false
 
-  constructor(
-    private cartService: CartService,
-    private destroyRef: DestroyRef,
-  ) {}
+  private cartService = inject(CartService)
+  // DestroyRef is not needed now because subscribe will be managed differently in tests
+  constructor() {}
 
   ngOnInit(): void {
-    // subscribe and update the raw signal; register cleanup with DestroyRef
-    const sub = this.cartService.getCartObservable().subscribe((raw) => this._cartRaw.set(raw));
-    this.destroyRef.onDestroy(() => sub.unsubscribe());
+    // subscribe and update the raw signal
+    const sub = this.cartService.getCartObservable().subscribe((raw) => this._cartRaw.set(raw))
+    // best-effort: try to unsubscribe on window unload for non-Angular environments
+    if (typeof window !== 'undefined') {
+      window.addEventListener('unload', () => sub.unsubscribe())
+    }
 
     // still trigger an initial fetch
-    this.cartService.fetch().catch(() => {});
+    this.cartService.fetch().catch(() => {})
   }
 
   toggleDropdown(event: Event) {
-    event.stopPropagation();
-    this.dropdownOpen = !this.dropdownOpen;
+    event.stopPropagation()
+    this.dropdownOpen = !this.dropdownOpen
   }
 
   private formatPrice(n: number) {
-    if (!n) return '€0.00';
-    return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'EUR' }).format(n);
+    if (!n) return '€0.00'
+    return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'EUR' }).format(n)
   }
 
   /**
    * Normalize possible backend cart payload shapes into a CartItem array.
    * Supports: [] | { cart: [] } | numeric-keyed object -> array
    */
-  private normalizeCart(
-    raw: CartItem[] | { cart: CartItem[] } | Record<string, CartItem> | null,
-  ): CartItem[] {
-    if (!raw) return [];
-    if (Array.isArray(raw)) return raw;
-    if ('cart' in raw && Array.isArray((raw as any).cart)) return (raw as any).cart as CartItem[];
-
+  private normalizeCart(raw: CartItem[] | { cart: CartItem[] } | Record<string, CartItem> | null): CartItem[] {
+    if (!raw) return []
+    if (Array.isArray(raw)) return raw
     if (typeof raw === 'object') {
-      const maybeArray = Object.keys(raw)
-        .filter((k) => !isNaN(Number(k)))
+      // handle { cart: [...] }
+      const asObj = raw as unknown as Record<string, unknown>
+  if ('cart' in asObj && Array.isArray(asObj['cart'])) return asObj['cart'] as unknown as CartItem[]
+
+      const maybeArray = Object.keys(asObj)
+        .filter((k) => !Number.isNaN(Number(k)))
         .sort((a, b) => Number(a) - Number(b))
-        .map((k) => (raw as Record<string, CartItem>)[k]);
-      if (maybeArray.length) return maybeArray;
+        .map((k) => asObj[k] as unknown as CartItem)
+      if (maybeArray.length) return maybeArray
     }
 
-    return [];
+    return []
   }
 
-  private updateTotals(items: CartItem[]) {
+  private updateTotals(): void {
     // kept for compatibility but no longer used - totals are computed from signals
   }
 }

@@ -4,13 +4,14 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { BehaviorSubject } from 'rxjs';
 import { CartService } from '../cart/cart.service';
 import { CommonModule } from '@angular/common';
+import type { CartItem } from '../cart/cart-types';
 
 describe('HeaderComponent', () => {
-  let cartSubject: BehaviorSubject<any>;
+  let cartSubject: BehaviorSubject<CartItem[]>;
   let mockCartService: Partial<CartService>;
 
   beforeEach(async () => {
-    cartSubject = new BehaviorSubject<any>([]);
+  cartSubject = new BehaviorSubject<CartItem[]>([]);
     mockCartService = {
       getCartObservable: () => cartSubject.asObservable(),
       fetch: () => Promise.resolve([]),
