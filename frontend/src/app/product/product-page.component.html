@@ -1,19 +1,21 @@
 <div *ngIf="product; else loading" class="max-w-3xl mx-auto p-6">
   <div class="bg-white rounded-lg shadow-md overflow-hidden">
     <div class="p-6">
-  <h1 class="text-2xl font-bold">{{ product.name }}</h1>
-  <p class="mt-2 text-slate-600">{{ getDisplayDescription() }}</p>
+      <h1 class="text-2xl font-bold">{{ product.name }}</h1>
+      <p class="mt-2 text-slate-600">{{ getDisplayDescription() }}</p>
 
       <div class="mt-6 space-y-4">
         <div *ngFor="let vt of getVariantTypes()">
           <div class="text-sm font-medium text-slate-700 mb-2">{{ vt | titlecase }}</div>
           <div class="flex flex-wrap gap-2">
-            <app-variant-button *ngFor="let opt of getOptionsForVariant(vt)"
-                                [variantName]="vt"
-                                [value]="opt"
-                                [selectedValue]="selected[vt]"
-                                [disabled]="!isOptionAvailable(vt, opt)"
-                                (select)="selectVariant($event.variant, $event.value)">
+            <app-variant-button
+              *ngFor="let opt of getOptionsForVariant(vt)"
+              [variantName]="vt"
+              [value]="opt"
+              [selectedValue]="selected[vt]"
+              [disabled]="!isOptionAvailable(vt, opt)"
+              (select)="selectVariant($event.variant, $event.value)"
+            >
             </app-variant-button>
           </div>
         </div>
@@ -22,21 +24,39 @@
       <div class="mt-6">
         <form (ngSubmit)="addToCart()" class="space-y-4">
           <div *ngIf="finalCombination">
-            <div *ngIf="finalCombination.error" class="text-red-600">{{ finalCombination.error }}</div>
+            <div *ngIf="finalCombination.error" class="text-red-600">
+              {{ finalCombination.error }}
+            </div>
             <div *ngIf="!finalCombination.error" class="space-y-2">
               <h3 class="text-lg font-semibold">Selected Variant</h3>
-              <div class="text-sm">SKU: <span class="font-medium">{{ finalCombination.sku }}</span></div>
-              <div class="text-sm">Price: <span class="font-medium">{{ finalCombination.price }}</span></div>
-              <div class="text-sm">Stock: <span class="font-medium">{{ finalCombination.stock }}</span></div>
-              <div *ngIf="getFinalCombinationDescription()" class="text-sm mt-2 text-slate-700">{{ getFinalCombinationDescription() }}</div>
+              <div class="text-sm">
+                SKU: <span class="font-medium">{{ finalCombination.sku }}</span>
+              </div>
+              <div class="text-sm">
+                Price: <span class="font-medium">{{ finalCombination.price }}</span>
+              </div>
+              <div class="text-sm">
+                Stock: <span class="font-medium">{{ finalCombination.stock }}</span>
+              </div>
+              <div *ngIf="getFinalCombinationDescription()" class="text-sm mt-2 text-slate-700">
+                {{ getFinalCombinationDescription() }}
+              </div>
             </div>
           </div>
 
           <div class="flex items-center gap-3">
             <label class="text-sm">Quantity</label>
-            <input type="number" min="1" [(ngModel)]="quantity" name="quantity" class="w-20 px-2 py-1 border rounded" />
+            <input
+              type="number"
+              min="1"
+              [(ngModel)]="quantity"
+              name="quantity"
+              class="w-20 px-2 py-1 border rounded"
+            />
             <!-- Disable add when there is no valid final combination or it contains an error -->
-            <app-button type="submit" [disabled]="!finalCombination || !!finalCombination.error">Add to cart</app-button>
+            <app-button type="submit" [disabled]="!finalCombination || !!finalCombination.error"
+              >Add to cart</app-button
+            >
           </div>
         </form>
       </div>

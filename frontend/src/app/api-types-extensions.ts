@@ -4,7 +4,9 @@ import type { Product, ProductVariantCombination } from './api-types-exports';
 // (e.g., combinations, variantTypes, and dynamic lists like 'colors'). We augment the generated
 // types with optional fields and a permissive index signature for those dynamic properties.
 
-export type ProductVariantCombinationWithOptions = Partial<Omit<ProductVariantCombination, 'options'>> & {
+export type ProductVariantCombinationWithOptions = Partial<
+  Omit<ProductVariantCombination, 'options'>
+> & {
   // Backend uses a JSON field for options which is an object mapping variantName->value.
   options?: Record<string, string>;
 };

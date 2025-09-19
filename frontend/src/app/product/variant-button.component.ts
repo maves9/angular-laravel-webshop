@@ -7,10 +7,16 @@ import { ButtonComponent } from '../ui/button.component';
   selector: 'app-variant-button',
   imports: [CommonModule, ButtonComponent],
   template: `
-    <app-button type="button" [disabled]="disabled" [variant]="disabled ? 'ghost' : (selectedValue===value ? 'primary' : 'ghost')" size="sm" (click)="onClick()">
+    <app-button
+      type="button"
+      [disabled]="disabled"
+      [variant]="disabled ? 'ghost' : selectedValue === value ? 'primary' : 'ghost'"
+      size="sm"
+      (click)="onClick()"
+    >
       {{ value }}
     </app-button>
-  `
+  `,
 })
 export class VariantButtonComponent {
   @Input() variantName = '';
@@ -26,5 +32,7 @@ export class VariantButtonComponent {
   }
 
   // styling delegated to ButtonComponent
-  classes() { return ''; }
+  classes() {
+    return '';
+  }
 }

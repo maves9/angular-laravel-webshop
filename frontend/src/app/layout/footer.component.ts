@@ -1,5 +1,5 @@
-import { Component } from '@angular/core'
-import { CommonModule } from '@angular/common'
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 @Component({
   standalone: true,
@@ -11,8 +11,8 @@ import { CommonModule } from '@angular/common'
         <small class="text-sm">© {{ year }} Webshop</small>
       </div>
     </footer>
-  `
+  `,
 })
 export class FooterComponent {
-  year = new Date().getFullYear()
+  year = new Date().getFullYear();
 }

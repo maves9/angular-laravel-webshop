@@ -8,8 +8,7 @@ export class CartService {
   // CSRF token removed: backend no longer provides /api/csrf. We rely on session cookies.
   private apiBase = 'http://localhost:8000/api';
 
-  constructor() {
-  }
+  constructor() {}
 
   public getCartObservable() {
     return this.cart$.asObservable();
@@ -17,8 +16,11 @@ export class CartService {
 
   // CSRF fetching removed. Session cookies are used directly.
 
-  public async add(productId: number, quantity = 1, options: Record<string, unknown> = {}): Promise<CartItem[] | { cart: CartItem[] } | Record<string, CartItem>> {
-
+  public async add(
+    productId: number,
+    quantity = 1,
+    options: Record<string, unknown> = {},
+  ): Promise<CartItem[] | { cart: CartItem[] } | Record<string, CartItem>> {
     const payload = {
       product_id: productId,
       quantity,

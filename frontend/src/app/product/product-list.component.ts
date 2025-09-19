@@ -7,7 +7,7 @@ import { RouterModule } from '@angular/router';
   standalone: true,
   selector: 'app-product-list',
   imports: [CommonModule, RouterModule],
-  templateUrl: './product-list.component.html'
+  templateUrl: './product-list.component.html',
 })
 export class ProductList {
   products: ProductWithExtras[] = [];

@@ -11,7 +11,8 @@ import { CommonModule } from '@angular/common';
       [disabled]="disabled"
       [attr.aria-disabled]="disabled ? 'true' : null"
       (click)="onClick($event)"
-      [ngClass]="classes()">
+      [ngClass]="classes()"
+    >
       <ng-content></ng-content>
     </button>
   `,
