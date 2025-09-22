@@ -34,8 +34,8 @@ export class CartService {
     });
 
     if (res.status === 201 || res.ok) {
-      const cart = await res.json();
-      this.cart$.next(cart as CartItem[]);
+      const cart = (await res.json()) as CartItem[];
+      this.cart$.next(cart);
       return cart as CartItem[];
     }
 
@@ -48,8 +48,8 @@ export class CartService {
       credentials: 'include',
     });
     if (res.ok) {
-      const cart = await res.json();
-      this.cart$.next(cart as CartItem[]);
+      const cart = (await res.json()) as CartItem[];
+      this.cart$.next(cart);
       return cart as CartItem[];
     }
     return [];

@@ -19,7 +19,7 @@ export class ProductList {
   async loadProducts() {
     const res = await fetch('http://localhost:8000/api/products', { credentials: 'include' });
     if (res.ok) {
-      this.products = await res.json();
+      this.products = (await res.json()) as ProductWithExtras[];
     }
   }
 }

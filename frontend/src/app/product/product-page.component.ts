@@ -69,63 +69,17 @@ export class ProductPage {
     }
   }
 
-  /**
-   * Return a description to display: prefer finalCombination.description when available,
-   * otherwise aggregate selected variant descriptions (prefer 'en'), otherwise product.description.
-   */
-  public getDisplayDescription(locale = 'en'): string | null {
-    // 1) final combination description
+  public getDisplayDescription(): string | null {
     const combination =
       this.finalCombination && !('error' in this.finalCombination)
         ? (this.finalCombination as ProductVariantCombinationWithOptions)
         : null
 
-    if (combination && (combination as unknown as { description?: unknown }).description)
-      return (combination as unknown as { description?: string }).description as string
-
-    // 2) aggregate selected variant descriptions
-    const variantOptions = this.product
-      ? (this.product['variant_options'] as Record<string, Array<unknown>> | undefined)
-      : undefined
-
-    if (!this.product || !this.selected) return this.product?.description ?? null
-
-    type VariantEntry = { value?: string; descriptions?: Record<string, string> }
-    const isVariantEntry = (v: unknown): v is VariantEntry => typeof v === 'object' && v !== null
-
-    const parts = Object.entries(this.selected).flatMap(([variantName, value]) => {
-      const arr = variantOptions
-        ? (variantOptions[variantName] as unknown[] | undefined)
-        : undefined;
-      if (Array.isArray(arr)) {
-        const entry = arr.find((a) => isVariantEntry(a) && (a.value === value || a === value)) as
-          | VariantEntry
-          | undefined
-
-        if (!entry || !entry.descriptions) return []
-
-        const descs = entry.descriptions as Record<string, string>
-        const d = (descs[locale] || descs['en'] || Object.values(descs)[0]) as string | undefined
-
-        return typeof d === 'string' && d.length > 0 ? [d] : []
-      }
-
-      const combos =
-        (this.product?.combinations as ProductVariantCombinationWithOptions[] | undefined) ||
-        undefined
-
-      if (!combos) return [];
-      const found = combos.find(
-        (combo) =>
-          ((combo.options as Record<string, string> | undefined) || {})[variantName] === value &&
-          (combo as unknown as { description?: unknown }).description,
-      )
-      return found ? [(found as unknown as { description: string }).description] : []
-    });
-
-    if (parts.length > 0) return parts.join(' — ')
-
-    return this.product?.description ?? null
+    if (combination && (combination as { description?: unknown }).description) {
+      return (combination as { description?: string }).description as string
+    } else {
+      return null
+    }
   }
 
   /** Return the description string for the finalized combination if present */
@@ -134,9 +88,9 @@ export class ProductPage {
       this.finalCombination && !('error' in this.finalCombination)
         ? (this.finalCombination as ProductVariantCombinationWithOptions)
         : null;
-    if (!combination || !('description' in (combination as unknown as Record<string, unknown>)))
+    if (!combination || !('description' in (combination as Record<string, unknown>)))
       return null;
-    const d = (combination as unknown as Record<string, unknown>)['description'];
+    const d = (combination as Record<string, unknown>)['description'];
     return typeof d === 'string' ? d : String(d);
   }
 
@@ -150,9 +104,9 @@ export class ProductPage {
       return this.product.variantTypes
     }
 
-    const variantOptions = this.product
-      ? (this.product['variant_options'] as Record<string, Array<unknown>> | undefined)
-      : undefined
+    const variantOptions = this.product?.['variant_options'] as
+      | Record<string, Array<unknown>>
+      | undefined
 
     if (variantOptions) return Object.keys(variantOptions)
     const combos =
@@ -191,8 +145,8 @@ export class ProductPage {
       | Record<string, Array<unknown>>
       | undefined
 
-    const arr = variantOptions ? (variantOptions[variantName] as unknown[] | undefined) : undefined;
-    if (Array.isArray(arr))
+  const arr = variantOptions?.[variantName] as unknown[] | undefined;
+  if (Array.isArray(arr))
       return arr.map((a) => {
         if (a && typeof a === 'object' && 'value' in (a as Record<string, unknown>)) {
           return String((a as Record<string, unknown>)['value']);
